@@ -1,0 +1,5 @@
+#!/bin/sh
+if c++ main.cpp zipper.h zipper.cpp -o main; then
+    ./main
+
+fi
