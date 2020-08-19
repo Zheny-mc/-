@@ -1,4 +1,5 @@
 #include "zipper.h"
+#include "Xor.cpp"
 
 Zipper::Zipper(const vector<string>& FileNames, const string& name)
 {
