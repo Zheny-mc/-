@@ -1,5 +1,4 @@
 #include "zipper.h"
-#include "Xor.cpp"
 
 Zipper::Zipper(const string& name, const vector<string>& FileNames)
 {
@@ -26,6 +25,7 @@ void Zipper::Pack()
 	vector<int> fileLens = FileLens(FileNames);
 	FILE* fIn = NULL;
 	FILE* fOut = fopen(name.c_str(), "wb");
+	string tmp_FileName;  //строка для записи зашифрованного имени файлаё
 	char ch;//символ для считывания
 	int count = FileNames.size(); // Количество файлов
 	int nameLen; //Количество символов в файле
@@ -39,19 +39,24 @@ void Zipper::Pack()
 			std::cout << FileNames[i] << ": " << "Error" << std::endl;
 			continue;
 		}
+		tmp_FileName = FileNames[i];  //подготовка к шифрованию имени файла(создание копии)
+
 		//запись имени файла
 		nameLen = FileNames[i].size();
 		fwrite(&nameLen, sizeof(int), 1, fOut);
-		fwrite(FileNames[i].c_str(), sizeof(char), nameLen, fOut);
+		encrypion(tmp_FileName);  //шифрование имени файла
+		fwrite(tmp_FileName.c_str(), sizeof(char), nameLen, fOut);
 		
 		//запись даннных
 		fwrite(&fileLens[i], sizeof(int), 1, fOut);
-		fIn = fopen(FileNames[i].c_str(), "rb");
+		fIn = fopen(FileNames[i].c_str(), "rb");  //открытие i файла
 		
 		while(fread(&ch, sizeof(char), 1, fIn))
 			fwrite(&ch, sizeof(char), 1, fOut);
 
 		std::cout << FileNames[i] << std::endl;
+
+		fclose(fIn);  //закрытие i файла
 	}
 
 	fclose(fOut);
@@ -77,6 +82,8 @@ void Zipper::UnPack()
 			fread(&ch, sizeof(char), 1, fOut);
 			FileName.push_back(ch);
 		}
+
+		decryption(FileName);  //расшифровка имени файла
 
 		fIn = fopen(FileName.c_str(), "wb");
 		fread(&fileLen, sizeof(int), 1, fOut);  //считывание длины файла
@@ -131,12 +138,25 @@ vector<int> FileLens(const vector<string>& FileNames)
 }
 
 
-void Zipper::encrypion()  //шифрование
+void Zipper::encrypion(string& _FileName)  //шифрование
 {
-	//Xor();
+	/*Функция предназначена для шифровки имени файла*/
+	Xor(_FileName, key);
 }
 
-void Zipper::decryption()  //расшифровка
+void Zipper::decryption(string& _CodeFileName)  //расшифровка
 {
+	/*Функция предназначена для расшифровывания имени файла*/
+	Xor(_CodeFileName, key);
+}
 
+//для шифрование
+void Xor(string& StrLeft, const string& StrRight)
+{
+	/*Поэлемнтный xor двух строк*/
+	for (int i = 0, j = 0; i < StrLeft.size(); i++, j++)
+	{
+		if (j < StrRight.size()) j = 0;
+		StrLeft[i] ^= StrRight[j];
+	}
 }

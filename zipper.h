@@ -9,6 +9,7 @@ using std::string;
 
 int FileLen(FILE* f);
 vector<int> FileLens(const vector<string>& FileNames);
+void Xor(string& StrLeft, const string& StrRight);
 
 class Zipper
 {
@@ -25,11 +26,11 @@ public:
 	//архивация
 	void Pack(); //архивация
 	void compression(); //сжатие
-	void encrypion();  //шифрование
+	void encrypion(string& _FileName);  //шифрование
 	//распаковка
 	void UnPack();  //распаковка 
 	void streching();  //растяжение
-	void decryption();  //расшифровка
+	void decryption(string& _CodeFileName);  //расшифровка
 	//помощь
 	void help();
 };
