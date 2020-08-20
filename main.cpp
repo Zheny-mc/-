@@ -7,8 +7,10 @@ int main()
 {
 	string name = "test.zip";
 	vector<string> args = {"file1.dat", "file2.dat"};
-	
-	//Zipper arch(args, name);
+	string Key = "123";
+
+	Zipper arch1(name, args);
+	Zipper arch2(name, args, Key);
 	//arch.Pack();
 	//arch.UnPack();	
 	/*

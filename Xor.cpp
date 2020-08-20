@@ -1,35 +1,11 @@
 #include <iostream>
-#include <cstdlib>
 #include <string>
 
-#define alphabet 255
-using std::string;
-
-void GenerateKey(string& key, const int text_len)
+void Xor(std::string& StrLeft, const std::string& StrRight)
 {
-	srand(time(0));
-	int ch;
-
-	for (int i = 0; i < text_len; i++)
+	for (int i = 0, j = 0; i < StrLeft.size(); i++, j++)
 	{
-		ch = rand() % alphabet;
-		key.push_back(ch);
+		if (j < StrRight.size()) j = 0;
+		StrLeft[i] ^= StrRight[j];
 	}
-}
-
-string Code(string& text)
-{
-	string key;
-	GenerateKey(key, text.size());
-
-	for (int i = 0; i < text.size(); i++)
-		text[i] ^= key[i];
-
-	return key;
-}
-
-void DeCode(string& code_text, const string& key)
-{
-	for (int i = 0; i < code_text.size(); i++)
-		code_text[i] ^= key[i];
 }

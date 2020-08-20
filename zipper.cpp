@@ -1,10 +1,19 @@
 #include "zipper.h"
 #include "Xor.cpp"
 
-Zipper::Zipper(const vector<string>& FileNames, const string& name)
+Zipper::Zipper(const string& name, const vector<string>& FileNames)
 {
-    this->FileNames = FileNames;
+	/*Архивация без шифрования*/
+	this->name = name;
+	this->FileNames = FileNames;
+}
+
+Zipper::Zipper(const string& name, const vector<string>& FileNames, const string& key)
+{
+	/*Архивация с шифрованием*/
     this->name = name;
+	this->FileNames = FileNames;
+    this->key = key;
 }
 
 Zipper::~Zipper()
@@ -30,7 +39,7 @@ void Zipper::Pack()
 			std::cout << FileNames[i] << ": " << "Error" << std::endl;
 			continue;
 		}
-		//запист имени файла
+		//запись имени файла
 		nameLen = FileNames[i].size();
 		fwrite(&nameLen, sizeof(int), 1, fOut);
 		fwrite(FileNames[i].c_str(), sizeof(char), nameLen, fOut);
@@ -119,4 +128,15 @@ vector<int> FileLens(const vector<string>& FileNames)
 			lens.push_back(ERROR);
 	}
 	return lens;
+}
+
+
+void Zipper::encrypion()  //шифрование
+{
+	//Xor();
+}
+
+void Zipper::decryption()  //расшифровка
+{
+
 }

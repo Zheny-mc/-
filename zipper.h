@@ -13,11 +13,13 @@ vector<int> FileLens(const vector<string>& FileNames);
 class Zipper
 {
 private:
-	string name; //имя архива
-	vector<string> FileNames; //имена файлов
+	string name;  //имя архива
+	vector<string> FileNames;  //имена файлов
+	string key;  //ключ для шифрования
 
 public:
-	Zipper(const vector<string>& FileNames, const string& name);
+	Zipper(const string& name, const vector<string>& FileNames);
+	Zipper(const string& name, const vector<string>& FileNames, const string& key);
 	~Zipper();
 
 	//архивация
