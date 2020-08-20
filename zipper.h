@@ -35,15 +35,3 @@ public:
 	void help();
 };
 
-class Power 
-{
-public:
-	int mode; //режим запуска
-	Zipper archive;
-
-	void check_args(const vector<string>& argv);
-	void poll(const string& Mode);
-	void run();
-};
-
-
