@@ -1,18 +1,10 @@
 #include "zipper.h"
 
 Zipper::Zipper(const string& name, const vector<string>& FileNames)
-{
-	/*Архивация без шифрования*/
-	this->name = name;
-	this->FileNames = FileNames;
-}
-
-Zipper::Zipper(const string& name, const vector<string>& FileNames, const string& key)
-{
+{	
 	/*Архивация с шифрованием*/
     this->name = name;
 	this->FileNames = FileNames;
-    this->key = key;
 }
 
 Zipper::~Zipper()
@@ -20,17 +12,22 @@ Zipper::~Zipper()
 
 void Zipper::Pack()
 {
-    /*Создает архив из текстовых файлов
-	<count_file> <name_file_len><name_file><Datalen><Data> <name_file_len><name_file><Datalen><Data>...*/
+    /*Создает архив из текстовых файлов*/
+	fOut = fopen(name.c_str(), "wb");
+	count = FileNames.size();  // Количество файлов
 	vector<int> fileLens = FileLens(FileNames);
-	FILE* fIn = NULL;
-	FILE* fOut = fopen(name.c_str(), "wb");
-	string tmp_FileName;  //строка для записи зашифрованного имени файлаё
-	char ch;//символ для считывания
-	int count = FileNames.size(); // Количество файлов
-	int nameLen; //Количество символов в файле
+	int FileNameLen;  //длина имени файла
+	
+	if (HaveKey)  //если архив с паролем
+	{
+		printf("Input key: ");
+		std::cin >> key;
+		cash = Cash(key);
+		fwrite(&cash, sizeof(int), 1, fOut);	
+	}
 
-	fwrite(&count, sizeof(int), 1, fOut); //запись количества файлов
+	//запись количества файлов
+	fwrite(&count, sizeof(int), 1, fOut); 
 
 	for (int i = 0; i < count; i++)
 	{
@@ -39,14 +36,12 @@ void Zipper::Pack()
 			std::cout << FileNames[i] << ": " << "Error" << std::endl;
 			continue;
 		}
-		tmp_FileName = FileNames[i];  //подготовка к шифрованию имени файла(создание копии)
 
 		//запись имени файла
-		nameLen = FileNames[i].size();
-		fwrite(&nameLen, sizeof(int), 1, fOut);
-		encrypion(tmp_FileName);  //шифрование имени файла
-		fwrite(tmp_FileName.c_str(), sizeof(char), nameLen, fOut);
-		
+		FileNameLen = FileNames[i].size();
+		fwrite(&FileNameLen, sizeof(int), 1, fOut);
+		fwrite(FileNames[i].c_str(), sizeof(char), FileNameLen, fOut);
+
 		//запись даннных
 		fwrite(&fileLens[i], sizeof(int), 1, fOut);
 		fIn = fopen(FileNames[i].c_str(), "rb");  //открытие i файла
@@ -64,49 +59,72 @@ void Zipper::Pack()
 
 void Zipper::UnPack()
 {
-    FILE* fIn = NULL;
-	FILE* fOut = fopen(name.c_str(), "rb");
+	fOut = fopen(name.c_str(), "rb");
 	string FileName;
-	char ch;
-	int count;  //Количество файлов
-	int nameLen;  //Количество символов в имени файла
-	int fileLen;  //Количество символов в файле
+	int FileNameLen;  //Количество символов в имени файла
+	int FileLen;  //Количество символов в файле
+
+	if (HaveKey)
+	{
+		printf("Input key: ");
+		std::cin >> key;
+		fread(&cash, sizeof(int), 1, fOut);
+		
+		if (cash == Cash(key)) 
+			printf("UnPack archive...\n");
+		else
+		{
+			printf("Error key!\n");
+			goto close;
+		}
+	}
 
 	fread(&count, sizeof(int), 1, fOut);
 
 	for (int i = 0; i < count; i++)
 	{
-		fread(&nameLen, sizeof(int), 1, fOut);  //считывание длины файла
-		for (int i = 0; i < nameLen; i++)  //чтение имени файла
+		fread(&FileNameLen, sizeof(int), 1, fOut);  //считывание длину имени файла
+		for (int i = 0; i < FileNameLen; i++)  //чтение имени файла
 		{
 			fread(&ch, sizeof(char), 1, fOut);
 			FileName.push_back(ch);
 		}
 
-		decryption(FileName);  //расшифровка имени файла
-
 		fIn = fopen(FileName.c_str(), "wb");
-		fread(&fileLen, sizeof(int), 1, fOut);  //считывание длины файла
-		for (int i = 0; i < fileLen; i++)  //чтение имени файла
+		fread(&FileLen, sizeof(int), 1, fOut);  //считывание длины файла
+		for (int i = 0; i < FileLen; i++)  //чтение имени файла
 		{
 			fread(&ch, sizeof(char), 1, fOut);
 			fwrite(&ch, sizeof(char), 1, fIn);
 		}
 		fclose(fIn);
-		std::cout << FileName << std::endl; FileName = "";  //Выводим и Зачищаем строку для нового имени файла
+		std::cout << FileName << std::endl;  //Выводим
+		FileName = "";   //Зачищаем строку для нового имени файла
 	}
-
+close:
 	fclose(fOut);
 }
 
 void Zipper::help()
 {
-    std::cout << "I will help" << std::endl;
+    vector<string> strhelp = { 
+	"*****************Zipper***************",
+	"*./zipper <mode> <name>.zip(.z) <files>",
+	"*--<mode>:",
+	"*--<name>:",
+	"*--<files>:"
+	"*Pack:",
+	"*UnPack:"
+	"***************************************"
+	};
+
+	for (int i = 0; i < strhelp.size(); i++)
+		std::cout << strhelp[i] << std::endl;
 }
 
 int FileLen(FILE* f)
 {
-	/*Находит количество символов в файле*/
+	/* Находит количество символов в файле */
 	int count = 0;
 	char ch;
 
@@ -137,26 +155,46 @@ vector<int> FileLens(const vector<string>& FileNames)
 	return lens;
 }
 
-
+/*
 void Zipper::encrypion(string& _FileName)  //шифрование
 {
-	/*Функция предназначена для шифровки имени файла*/
+	//Функция предназначена для шифровки имени файла
 	Xor(_FileName, key);
 }
 
 void Zipper::decryption(string& _CodeFileName)  //расшифровка
 {
-	/*Функция предназначена для расшифровывания имени файла*/
+	//Функция предназначена для расшифровывания имени файла
 	Xor(_CodeFileName, key);
 }
+*/
 
-//для шифрование
-void Xor(string& StrLeft, const string& StrRight)
+void Zipper::info()
 {
-	/*Поэлемнтный xor двух строк*/
-	for (int i = 0, j = 0; i < StrLeft.size(); i++, j++)
-	{
-		if (j < StrRight.size()) j = 0;
-		StrLeft[i] ^= StrRight[j];
-	}
+	//информация о архиве
+	//-имена файлов
+	//-размер файлов
+	//-общий размер архива
+	
+}
+
+
+int Cash(const string& key)
+{
+	int sum = 0;
+	int del = key.size()+1;
+
+	for (int i = 0; i < del; i++) sum += int(key[i]);
+
+	return sum / del;
+}
+
+bool check_key(int cash, const string& key)
+{
+	return cash == Cash(key)? true : false;
+}
+
+void selecting_FileName(vector<string>& path)
+{
+	//Выделяет имя файла из пути
 }
