@@ -1,27 +1,56 @@
 from tkinter import *
 from tkinter.ttk import Combobox
 
-def KeyClicked():
-    print('key')
-
 def OkClicked():
-    print('Ok')
-
-def CanelClicked():
-    print('Canel')
+    print(txt_name.get())
+    print("Создаю архив")
+    print("Закрываю программу")
 
 def HelpClicked():
-    print('help')
+    print('Вызываю помощь')
+    print('Закрываю программу')
 
-WIDTH = 660
-HEIGHT = 175
-FONT_SIZE = 12
+WIDTH = 640
+HEIGHT = 480
+FONT_SIZE = 11
 
 window = Tk()
 window.title("Zipper")
-window.geometry(str(WIDTH)+"x"+str(HEIGHT))
-window.resizable(False, False)
+window.geometry(str(WIDTH)+'x'+str(HEIGHT))
+#window.resizable(False, False)
 
+#**************************************************************************
+top_frame = Frame(window)
+top_frame.pack(fill=X)
+
+lbl_name = Label(top_frame, text="Имя архива")
+lbl_name.pack(side=LEFT)
+
+middle_frame_1 = Frame(window)
+middle_frame_1.pack(fill=X)
+
+txt_name = Entry(middle_frame_1, text="input")
+txt_name.pack(fill=X)
+#**************************************************************************
+
+bottom_frame = Frame(window, relief=RAISED, borderwidth=1)
+bottom_frame.pack(side=BOTTOM, fill=X)
+
+button_help = Button(bottom_frame, text="Справка", command=HelpClicked)
+button_help.pack(side=RIGHT, padx=5, pady=5)
+
+button_canel = Button(bottom_frame, text="Отмена", command=window.destroy)
+button_canel.pack(side=RIGHT)
+
+button_ok = Button(bottom_frame, text="Готово", command=OkClicked)
+button_ok.pack(side=RIGHT, padx=5, pady=5)
+#****************************************************************************
+
+
+
+
+
+'''
 #виджеты
 lbl_name = Label(window, text="Имя архива", font=("Arial Bold", FONT_SIZE))
 txt_name = Entry(window, width=WIDTH)
@@ -44,24 +73,8 @@ btn_installKey = Button(window, text="Установить пароль...", fon
 btn_ok = Button(window, text="ОК", font=("Arial Bold", FONT_SIZE), command=OkClicked)
 btn_canel = Button(window, text="Отмена", font=("Arial Bold", FONT_SIZE), command=CanelClicked)
 btn_help = Button(window, text="Справка", font=("Arial Bold", FONT_SIZE), command=HelpClicked)
-
+'''
 #отображение виджитов
-lbl_name.place(anchor="nw")
-txt_name.place(x=0, y=20, width=WIDTH)
-lbl_compression.place(x=0, y=45)
-combo_compression.place(x=5, y=65)
-
-lbl_division.place(x=0, y=85)
-combo_division.place(x=5, y=105)
-
-lbl_paramArchiving.place(x=WIDTH*0.42, y=45)
-rbt1_paramArchiving.place(x=WIDTH*0.42, y=65)
-rbt2_paramArchiving.place(x=WIDTH*0.42, y=85)
-
-btn_installKey.place(x=5, y=HEIGHT*0.78)
-btn_ok.place(x=WIDTH*(0.6), y=HEIGHT*0.78, width=80)
-btn_canel.place(x=WIDTH*(0.6)+90, y=HEIGHT*0.78, width=80)
-btn_help.place(x=WIDTH*(0.6)+180, y=HEIGHT*0.78, width=80)
 
 #зацикливание
 window.mainloop()
